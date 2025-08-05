@@ -11,22 +11,31 @@ OUTPUT_DIR="pokemon_data"
 for pokemon in "${POKEMON[@]}"; do
     echo "Fetching data for $pokemon..."
 
-    # Construct the full API URL and the output file path
     full_url="${API_URL}${pokemon}"
     output_file="${OUTPUT_DIR}/${pokemon}.json"
 
-    # Use curl to fetch the data and save it to the output file
-    # -s: silent mode, prevents progress bar
-    # -o: write output to a file instead of stdout
-    curl -s -o "$output_file" "$full_url"
-    
-    # Check if the curl command was successful
-    if [ $? -eq 0 ]; then
+    retries=0
+    max_retries=3
+    success=false
+
+    while [ $retries -lt $max_retries ] && [ "$success" = false ]; do
+        curl -sf -o "$output_file" "$full_url"
+
+        # Check for both a successful exit code and a non-empty file
+        if [ $? -eq 0 ] && [ -s "$output_file" ]; then
+            success=true
+        else
+            retries=$((retries + 1))
+            echo "Request failed ($retries/$max_retries), retrying in 2 seconds..."
+            sleep 2
+        fi
+    done
+
+    if [ "$success" = true ]; then
         echo "Saved data to $output_file ✅"
     else
-        echo "Failed to fetch data for $pokemon ❌"
+        echo "Failed to fetch data for $pokemon after $max_retries attempts ❌"
     fi
 
-    # Add a delay between requests to handle API rate-limiting
     sleep 1
 done
