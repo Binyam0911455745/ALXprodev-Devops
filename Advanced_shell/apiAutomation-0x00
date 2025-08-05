@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Define the API URL for Pikachu
+API_URL="https://pokeapi.co/api/v2/pokemon/pikachu"
+
+# Define the output files
+DATA_FILE="data.json"
+ERROR_FILE="errors.txt"
+
+# Make the request and save the output to data.json
+# -s: Silent mode, hides progress meter
+# -o: Saves the output to a specified file
+# -w "%{http_code}" adds the HTTP status code to stdout
+# tee is used to both display the output and capture the exit code of curl
+
+# Use curl to get the data and write it to data.json
+curl -s -o "$DATA_FILE" "$API_URL"
+
+# Check the exit status of the curl command
+if [ $? -eq 0 ]; then
+    # If the request was successful, print a success message
+    echo "API request for Pikachu successful. Data saved to $DATA_FILE."
+else
+    # If the request failed, log the error to errors.txt
+    echo "ERROR: Failed to retrieve data for Pikachu. Check API_URL and network connection." >> "$ERROR_FILE"
+    echo "Error logged to $ERROR_FILE."
+fi

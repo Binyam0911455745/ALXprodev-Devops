@@ -1,0 +1,1 @@
+ERROR: Failed to retrieve data for Pikachu. Check API_URL and network connection.
